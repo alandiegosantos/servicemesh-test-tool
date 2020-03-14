@@ -1,0 +1,4 @@
+dependencies:
+# - method: GET
+#   path: http://192.168.2.8:8080/status
+#   host: svc1.example.com
