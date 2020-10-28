@@ -16,4 +16,4 @@ clean:
 
 .PHONY: docker
 docker: ${GOFILES}
-	docker build . -t ${REGISTRY}/${TARGET}
+	docker build . -t ${REGISTRY}/${TARGET}:latest

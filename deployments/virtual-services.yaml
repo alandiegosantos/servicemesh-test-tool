@@ -1,0 +1,110 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: webapp-route
+spec:
+  hosts:
+  - webapp
+  gateways:
+  - webapp-gateway
+  http:
+  - name: "webapp-routes"
+    match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: webapp
+  exportTo: 
+  - "*"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: svc1-route
+spec:
+  hosts:
+  - svc1
+  http:
+  - name: "svc1-routes"
+    match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: svc1
+  exportTo: 
+  - "*"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: svc2-route
+spec:
+  hosts:
+  - svc2
+  http:
+  - name: "svc2-routes"
+    match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: svc2
+  exportTo: 
+  - "*"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: svc3-route
+spec:
+  hosts:
+  - svc3
+  http:
+  - name: "svc3-routes"
+    match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: svc3
+  exportTo: 
+  - "*"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: svc4-route
+spec:
+  hosts:
+  - svc4
+  http:
+  - name: "svc4-routes"
+    match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: svc4
+  exportTo: 
+  - "*"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: svc5-route
+spec:
+  hosts:
+  - svc5
+  http:
+  - name: "svc5-routes"
+    match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: svc5
+  exportTo: 
+  - "*"
+---

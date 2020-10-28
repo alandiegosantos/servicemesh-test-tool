@@ -6,35 +6,28 @@ data:
   webapp-dependencies.yaml: |
     dependencies:
     - method: GET
-      path: http://svc1.default/
-      host: svc1.default
+      path: http://svc1.default.svc.cluster.local/
     - method: GET
-      path: http://svc2.default/
-      host: svc2.default
+      path: http://svc2.default.svc.cluster.local/
 
   svc1-dependencies.yaml: |
     dependencies:
     - method: GET
-      path: http://svc3.default/
-      host: svc3.default
+      path: http://svc3.default.svc.cluster.local/
    
   svc2-dependencies.yaml: |
     dependencies:
     - method: GET
-      path: http://svc5.default/
-      host: svc5.default
+      path: http://svc4.default.svc.cluster.local/
     - method: GET
-      path: http://svc4.default/
-      host: svc4.default
+      path: http://svc5.default.svc.cluster.local/
 
   svc3-dependencies.yaml: |
     dependencies:
     - method: GET
-      path: http://svc5.default/
-      host: svc5.default
+      path: http://svc4.default.svc.cluster.local/
     - method: GET
-      path: http://svc4.default/
-      host: svc4.default
+      path: http://svc5.default.svc.cluster.local/
 
   svc4-dependencies.yaml: |
     dependencies:

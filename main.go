@@ -3,11 +3,14 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -25,11 +28,14 @@ type serviceEntry struct {
 	Host   string `yaml:"host"`
 }
 
-func main() {
+var (
+	listenAddr     = flag.String("httpAddr", ":8080", "HTTP address used to listen")
+	confFile       = flag.String("conf", "./dependencies.yaml", "Path to configuration file")
+	waitTime       = flag.Int("wait", 20, "Wait this time (in ms) before responding the request")
+	welcomeMessage = flag.String("welcomeMessage", "Welcome", "Message appended to the response")
+)
 
-	listenAddr := flag.String("httpAddr", ":8080", "HTTP address used to listen")
-	confFile := flag.String("conf", "./dependencies.yaml", "Path to configuration file")
-	waitTime := flag.Int("wait", 20, "Wait this time (in ms) before responding the request")
+func main() {
 
 	flag.Parse()
 
@@ -111,15 +117,25 @@ func newRouter(conf *conf, waitTime int) *http.ServeMux {
 			Timeout: 10 * time.Second,
 		}
 
-		status := http.StatusOK
+		io.WriteString(w, *welcomeMessage+"\n\n")
+
+		io.WriteString(w, "Headers:\n")
+
+		for key, values := range r.Header {
+			io.WriteString(w, fmt.Sprintf("%s: %v\n", key, values))
+		}
+
+		io.WriteString(w, "\n")
 
 		for _, svc := range conf.Dependencies {
 
 			req, err := http.NewRequest(svc.Method, svc.Path, nil)
 
 			if err != nil {
-				status = http.StatusInternalServerError
-				break
+
+				io.WriteString(w, fmt.Sprintf("Dependency: %s Error: %v\n", svc.Path, err))
+				continue
+
 			}
 
 			for key, values := range r.Header {
@@ -128,22 +144,60 @@ func newRouter(conf *conf, waitTime int) *http.ServeMux {
 				}
 			}
 
-			req.Host = svc.Host
+			if len(svc.Host) > 0 {
+				req.Host = svc.Host
+			}
 
 			resp, err := client.Do(req)
 
 			if err != nil {
-				status = http.StatusInternalServerError
-				w.Write([]byte(fmt.Sprintf("ERROR: %v", err))
-			} else if resp.StatusCode != http.StatusOK {
-				status = resp.StatusCode
+
+				io.WriteString(w, fmt.Sprintf("Dependency: %s Error: %v", req.Host, err))
+
+				continue
+
+			}
+
+			io.WriteString(w, fmt.Sprintf("Dependency: %s Status: %v\n", req.Host, resp.StatusCode))
+
+			io.WriteString(w, "-------\n")
+
+			if body, err := ioutil.ReadAll(resp.Body); err == nil {
+
+				bodyString := "\t" + strings.ReplaceAll(string(body), "\n", "\n\t") + "\n"
+
+				io.WriteString(w, bodyString)
+
+			} else {
+
+				io.WriteString(w, fmt.Sprintf("Cannot read body: %v\n", err))
+
+			}
+
+			resp.Body.Close()
+
+			io.WriteString(w, "-------\n")
+
+			for key, values := range resp.Header {
+				for _, value := range values {
+					w.Header().Add(key, value)
+				}
 			}
 
 		}
 
+		for key, values := range r.Header {
+			for _, value := range values {
+				w.Header().Add(key, value)
+			}
+		}
+
 		time.Sleep(time.Duration(waitTime) * time.Millisecond)
 
-		w.WriteHeader(status)
+		hostname, _ := os.Hostname()
+
+		io.WriteString(w, fmt.Sprintf("Processed by %s", hostname))
+
 	})
 
 	return router
