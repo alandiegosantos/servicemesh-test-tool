@@ -200,6 +200,12 @@ func newRouter(conf *conf, waitTime int) *http.ServeMux {
 
 	})
 
+	router.HandleFunc("/auth", func(w http.ResponseWriter, r *http.Request) {
+
+		io.WriteString(w, "123456789")
+
+	})
+
 	return router
 
 }
